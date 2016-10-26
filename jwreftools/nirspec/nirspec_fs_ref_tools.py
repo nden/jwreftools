@@ -460,29 +460,31 @@ def disperser2asdf(disfile, tiltyfile, tiltxfile, outname, ref_kw):
         ind = lines.index('*PREF')
         d['pref'] = float(lines[ind + 1]) # Pressure in ATM
 
-        ind = lines.index('*COEFFORMULA')
-        coefs = np.array(lines[ind : ind+int(l[-1])], dtype=np.float)
+        ind = lines.index('*COEFFORMULA 1 6')
+        l = lines[ind]
+        coefs = np.array(lines[ind+1 : ind+int(l[-1])+1], dtype=np.float)
         kcoef = coefs[::2]
         lcoef = coefs[1::2]
         d['lcoef'] = lcoef
         d['kcoef'] = kcoef
 
         # 6 coeffs - D0, D1, D2, E0, E1, lambdak
-        ind = lines.index('*THERMALCOEF')
-        coefs = lines[ind : ind+int(l[-1])]
-        d['tcoef'] = [float(c) for c in coefs]
+        ind = lines.index('*THERMALCOEF 1 6')
+        coefs = lines[ind+1 : ind+int(l[-1])+1]
+        d['tcoef'] = np.array(coefs, dtype=np.float)#[float(c) for c in coefs]
 
-        ind = lines.index('*WBOUND')
-        coefs = lines[ind : ind + 2]
+        ind = lines.index('*WBOUND 2 1')
+        #coefs = lines[ind+1 : ind + 2]
+        coefs = lines[ind + 1].split()
         d['wbound'] = [float(c) for c in coefs]
 
     assert grating_name in tiltyfile
-    assert grating_name in tiltxfile
+    #assert grating_name in tiltxfile
     tiltyd = disperser_tilt(tiltyfile)
-    tiltxd = disperser_tilt(tiltxfile)
+    #tiltxd = disperser_tilt(tiltxfile)
 
     d['gwa_tiltx'] = tiltyd
-    d['gwa_tilty'] = tiltxd
+    #d['gwa_tilty'] = tiltxd
     fasdf = AsdfFile()
     fasdf.tree = d
     fasdf.add_history_entry("Build 6")
